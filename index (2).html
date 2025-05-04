@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #1e2a47, #3b4f6b);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #fff;
+            height: 100vh;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 0;
+            background: #2e3b55;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            align-items: center;
+            justify-content: flex-start;
+            transition: width 0.3s ease;
+            height: 100vh;
+            overflow-x: hidden;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 10;
+        }
+
+        .sidebar button {
+            width: 100%;
+            margin: 10px 0;
+            padding: 15px;
+            background: linear-gradient(145deg, #6a7fbb, #4c5e85);
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar button:hover {
+            background: linear-gradient(145deg, #4c5e85, #6a7fbb);
+            transform: translateY(-2px) scale(1.05);
+        }
+
+        .carbon-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 35px;
+            height: 30px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            z-index: 20;
+        }
+
+        .carbon-btn div {
+            width: 30px;
+            height: 5px;
+            background-color: #fff;
+            border-radius: 5px;
+        }
+
+        .content {
+            flex: 1;
+            padding: 30px;
+            transition: margin-left 0.3s ease;
+            position: relative;
+            margin-left: 0;
+            width: 100%;
+        }
+
+        section {
+            display: none;
+        }
+
+        section.active {
+            display: block;
+        }
+
+        .clock-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background-color: #fff;
+            border: 5px solid #333;
+            box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.2);
+            margin: auto;
+        }
+
+        .center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 10px;
+            height: 10px;
+            background-color: #333;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 3;
+        }
+
+        .hour-hand,
+        .minute-hand,
+        .second-hand {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform-origin: bottom center;
+            z-index: 0;
+        }
+
+        .hour-hand {
+            width: 8px;
+            height: 80px;
+            background-color: #3c9d68;
+            border-radius: 4px;
+        }
+
+        .minute-hand {
+            width: 6px;
+            height: 120px;
+            background-color: #ff8c00;
+            border-radius: 3px;
+        }
+
+        .second-hand {
+            width: 2px;
+            height: 140px;
+            background-color: #03a9f4;
+            border-radius: 1px;
+        }
+
+        .time-digital {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 20px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        input, button {
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #fff;
+            margin: 12px 0;
+            background: #506c7f;
+            color: #fff;
+            width: 100%;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, button:focus {
+            outline: none;
+            background-color: #688f97;
+        }
+
+        ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        li {
+            background: #607d8b;
+            padding: 12px;
+            margin: 5px 0;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        li:hover {
+            background: #78909c;
+            transform: scale(1.05);
+        }
+
+        .calculator-grid button {
+            padding: 20px;
+            background: linear-gradient(145deg, #5e7dbf, #354d6e);
+            border: none;
+            color: #fff;
+            font-size: 20px;
+            border-radius: 10px;
+            transition: background 0.3s ease, transform 0.2s ease;
+        }
+
+        .calculator-grid button:hover {
+            background: linear-gradient(145deg, #354d6e, #5e7dbf);
+            transform: scale(1.1);
+        }
+
+        .calculator-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        input#calc-display {
+            padding: 15px;
+            font-size: 24px;
+            background-color: #fff;
+            border-radius: 10px;
+            border: none;
+            color: #333;
+            margin-bottom: 15px;
+            width: 100%;
+        }
+
+        button.clear {
+            background-color: #e74c3c;
+        }
+
+        button.clear:hover {
+            background-color: #c0392b;
+        }
+
+        iframe {
+            border-radius: 10px;
+            border: none;
+            width: 100%;
+            height: 500px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="carbon-btn" onclick="toggleSidebar()">
+    <div></div>
+    <div></div>
+    <div></div>
+</div>
+
+<div class="sidebar">
+    <button onclick="showSection('clock')">Clock</button>
+    <button onclick="showSection('alarm')">Alarm</button>
+    <button onclick="showSection('schedule')">Schedule</button>
+    <button onclick="showSection('calculator')">Calculator</button>
+    <button onclick="showSection('flappy')">Flappy Bird</button>
+</div>
+
+<div class="content">
+    <section id="clock" class="active">
+        <h2>Indian Time Clock</h2>
+        <div class="clock-container">
+            <div class="center"></div>
+            <div class="hour-hand"></div>
+            <div class="minute-hand"></div>
+            <div class="second-hand"></div>
+            <div class="time-digital" id="digital-time"></div>
+        </div>
+    </section>
+
+    <section id="alarm">
+        <h2>Alarm</h2>
+        <input type="time" id="alarmTime">
+        <button onclick="setAlarm()">Set Alarm</button>
+        <button onclick="deleteAlarm()">Delete Alarm</button>
+        <p id="alarmStatus">No alarm set.</p>
+    </section>
+
+    <section id="schedule">
+        <h2>Schedule / To-Do</h2>
+        <input type="text" id="taskInput" placeholder="Add task">
+        <button onclick="addTask()">Add</button>
+        <ul id="taskList"></ul>
+    </section>
+
+    <section id="calculator">
+        <h2>Calculator</h2>
+        <input type="text" id="calc-display" readonly>
+        <div class="calculator-grid">
+            <button onclick="appendCalc('1')">1</button>
+            <button onclick="appendCalc('2')">2</button>
+            <button onclick="appendCalc('3')">3</button>
+            <button onclick="appendCalc('+')">+</button>
+            <button onclick="appendCalc('4')">4</button>
+            <button onclick="appendCalc('5')">5</button>
+            <button onclick="appendCalc('6')">6</button>
+            <button onclick="appendCalc('-')">-</button>
+            <button onclick="appendCalc('7')">7</button>
+            <button onclick="appendCalc('8')">8</button>
+            <button onclick="appendCalc('9')">9</button>
+            <button onclick="appendCalc('*')">*</button>
+            <button onclick="appendCalc('0')">0</button>
+            <button onclick="clearCalc()" class="clear">C</button>
+            <button onclick="calculateResult()">=</button>
+            <button onclick="appendCalc('/')">/</button>
+        </div>
+    </section>
+
+    <section id="flappy">
+        <h2>Flappy Bird</h2>
+        <iframe src="https://flappybird.io/" title="Flappy Bird Game"></iframe>
+    </section>
+</div>
+
+<script>
+    let sidebarOpen = false;
+
+    function toggleSidebar() {
+        const sidebar = document.querySelector('.sidebar');
+        const content = document.querySelector('.content');
+        sidebar.style.width = sidebarOpen ? '0' : '200px';
+        content.style.marginLeft = sidebarOpen ? '0' : '200px';
+        sidebarOpen = !sidebarOpen;
+    }
+
+    function showSection(sectionId) {
+        document.querySelectorAll('section').forEach(section => {
+            section.classList.remove('active');
+        });
+        document.getElementById(sectionId).classList.add('active');
+    }
+
+    // Clock
+    const hourHand = document.querySelector('.hour-hand');
+    const minuteHand = document.querySelector('.minute-hand');
+    const secondHand = document.querySelector('.second-hand');
+    const digitalTime = document.getElementById('digital-time');
+
+    function setClock() {
+        const now = new Date();
+        const hours = now.getHours();
+        const minutes = now.getMinutes();
+        const seconds = now.getSeconds();
+        hourHand.style.transform = `translate(-50%, -100%) rotate(${(hours % 12) * 30 + minutes / 2}deg)`;
+        minuteHand.style.transform = `translate(-50%, -100%) rotate(${minutes * 6}deg)`;
+        secondHand.style.transform = `translate(-50%, -100%) rotate(${seconds * 6}deg)`;
+        digitalTime.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+    setInterval(setClock, 1000);
+    setClock();
+
+    // Alarm
+    let alarmTime = null;
+    function setAlarm() {
+        alarmTime = document.getElementById('alarmTime').value;
+        if (alarmTime) {
+            document.getElementById('alarmStatus').innerText = `Alarm set for ${alarmTime}`;
+        } else {
+            alert('Please select a time!');
+        }
+    }
+
+    function deleteAlarm() {
+        alarmTime = null;
+        document.getElementById('alarmStatus').innerText = 'No alarm set.';
+        document.getElementById('alarmTime').value = '';
+    }
+
+    // Schedule
+    function addTask() {
+        const taskInput = document.getElementById('taskInput');
+        const taskList = document.getElementById('taskList');
+        const taskText = taskInput.value.trim();
+        if (taskText) {
+            const li = document.createElement('li');
+            li.textContent = taskText;
+            const delBtn = document.createElement('button');
+            delBtn.textContent = 'Delete';
+            delBtn.style.marginLeft = '10px';
+            delBtn.onclick = () => li.remove();
+            li.appendChild(delBtn);
+            taskList.appendChild(li);
+            taskInput.value = '';
+        }
+    }
+
+    // Calculator
+    function appendCalc(val) {
+        document.getElementById('calc-display').value += val;
+    }
+    function clearCalc() {
+        document.getElementById('calc-display').value = '';
+    }
+    function calculateResult() {
+        const display = document.getElementById('calc-display');
+        try {
+            display.value = eval(display.value);
+        } catch {
+            display.value = 'Error';
+        }
+    }
+
+    showSection('clock');
+</script>
+</body>
+</html>
